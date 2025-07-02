@@ -12,7 +12,7 @@ abstract class LogMsg {
 
 /*
 
-❌ Thread-safe: Not, if 2 threads call getInstance() at the same time, both can pass the null check and create 2 objects, breaking Singleton
+❌ Thread-safe: Not, if 2 threads call getLogger() at the same time, both can pass the null check and create 2 objects, breaking Singleton
 
 */
 class Logger extends LogMsg {
@@ -35,28 +35,41 @@ class Logger extends LogMsg {
 /*  Synchronized Method
 
 ✅ Thread-safe: Yes
-✅ Slow: Yes due to lazy loading (created only when needed)
-❌ Performance: "synchronized" slows down every call to getInstance() — even after the instance is created
+✅ Slow: Yes due to lazy loading (instance created only when needed)
+❌ Performance: "synchronized" ensures only one thread can access the method at a time, slows down every call to getLogger() — even after the instance is created
 
 */
+class ThreadSafeSlowLogger extends LogMsg {
 
+    private static ThreadSafeSlowLogger loggerObj;
+
+    private ThreadSafeSlowLogger() {}
+
+    public static synchronized ThreadSafeSlowLogger getLogger() {
+        if (loggerObj == null) {
+            loggerObj = new ThreadSafeSlowLogger();
+        }
+        return loggerObj;
+    }
+
+}
 
 
 /*  Eager Initialization
 
 ✅ Thread-safe: JVM ensures thread-safe class loading, JVM loads static variables only once per class, and that process is thread-safe by default
 ✅ Fast: Due to Eager Initialization, no synchronization needed
-❌ Performance: instance is created when class is loaded — even if never used - no support for lazy loading
+❌ Instance is created when class is loaded — even if never used - no support for lazy loading
 
 */
-class ThreadSafeLogger extends LogMsg {
+class ThreadSafeFastLogger extends LogMsg {
 
-    private static final ThreadSafeLogger threadSafeLoggerObj = new ThreadSafeLogger();
+    private static final ThreadSafeFastLogger LOGGER_OBJ = new ThreadSafeFastLogger();
 
-    private ThreadSafeLogger() {}
+    private ThreadSafeFastLogger() {}
 
-    public static ThreadSafeLogger getLogger() {
-        return threadSafeLoggerObj;
+    public static ThreadSafeFastLogger getLogger() {
+        return LOGGER_OBJ;
     }
 
 }
@@ -66,14 +79,19 @@ public class Singleton {
     public static void main(String[] args) {
 
         // not thread safe
-        Logger obj1 = Logger.getLogger();
-        Logger obj2 = Logger.getLogger();
+        var obj1 = Logger.getLogger();
+        var obj2 = Logger.getLogger();
         System.out.println(obj1 == obj2);
 
-        // thread safe
-        ThreadSafeLogger obj3 = ThreadSafeLogger.getLogger();
-        ThreadSafeLogger obj4 = ThreadSafeLogger.getLogger();
+        // thread safe + slow
+        var obj3 = ThreadSafeSlowLogger.getLogger();
+        var obj4 = ThreadSafeSlowLogger.getLogger();
         System.out.println(obj3 == obj4);
+
+        // thread safe + fast
+        var obj5 = ThreadSafeFastLogger.getLogger();
+        var obj6 = ThreadSafeFastLogger.getLogger();
+        System.out.println(obj5 == obj6);
 
         obj4.log("Implemented singleton pattern successfully");
     }
