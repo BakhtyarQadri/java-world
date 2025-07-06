@@ -32,10 +32,9 @@ class Logger extends LogMsg {
 
 
 
-/*  Synchronized Method
+/*  Lazy Initialization (instance created only when needed)
 
 ✅ Thread-safe: Yes
-✅ Slow: Yes due to lazy loading (instance created only when needed)
 ❌ Performance: "synchronized" ensures only one thread can access the method at a time, slows down every call to getLogger() — even after the instance is created
 
 */
