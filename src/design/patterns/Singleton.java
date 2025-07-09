@@ -13,6 +13,7 @@ abstract class LogMsg {
 /*
 
 ❌ Thread-safe: Not, if 2 threads call getLogger() at the same time, both can pass the null check and create 2 objects, breaking Singleton
+✅ Lazy Initialization
 
 */
 class Logger extends LogMsg {
@@ -57,8 +58,10 @@ class ThreadSafeSlowLogger extends LogMsg {
 /*  Eager Initialization
 
 ✅ Thread-safe: JVM ensures thread-safe class loading, JVM loads static variables only once per class, and that process is thread-safe by default
-✅ Fast: Due to Eager Initialization, no synchronization needed
-❌ Instance is created when class is loaded — even if never used - no support for lazy loading
+✅ High Performance: Due to Eager Initialization, no synchronization needed
+❌ Lazy Loading: instance is created when class is loaded — even if never used
+❌ Reflection Safe: we can set the private constructor to become accessible at runtime using reflection
+❌ Serialization/Deserialization Safe
 
 */
 class ThreadSafeFastLogger extends LogMsg {
@@ -73,6 +76,24 @@ class ThreadSafeFastLogger extends LogMsg {
 
 }
 
+/*  Enum
+
+✅ Thread-safe: Enums are inherently thread-safe in Java. The JVM guarantees that enum constants are initialized only once even in a multi-threaded environment.
+✅ High Performance
+❌ Lazy Initialization: JVM automatically creates a private constructor, initializes the INSTANCE field during class loading.
+✅ Reflection Safe
+✅ Serialization/Deserialization Safe
+
+*/
+enum EnumLogger {
+
+    INSTANCE;
+
+    public void log(String msg) {
+        System.out.println(msg);
+    }
+}
+
 public class Singleton {
 
     public static void main(String[] args) {
@@ -82,17 +103,19 @@ public class Singleton {
         var obj2 = Logger.getLogger();
         System.out.println(obj1 == obj2);
 
-        // thread safe + slow
         var obj3 = ThreadSafeSlowLogger.getLogger();
         var obj4 = ThreadSafeSlowLogger.getLogger();
         System.out.println(obj3 == obj4);
 
-        // thread safe + fast
         var obj5 = ThreadSafeFastLogger.getLogger();
         var obj6 = ThreadSafeFastLogger.getLogger();
         System.out.println(obj5 == obj6);
 
-        obj4.log("Implemented singleton pattern successfully");
+        var obj7 = EnumLogger.INSTANCE;
+        var obj8 = EnumLogger.INSTANCE;
+        System.out.println(obj7 == obj8);
+
+        obj8.log("Implemented singleton pattern successfully");
     }
 
 }
