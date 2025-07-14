@@ -44,7 +44,7 @@ public class Generic {
 
 }
 
-// Generic Class & Methods
+// Generic Class and Methods
 class Printer<T> {
 
     public void log(T message) {
