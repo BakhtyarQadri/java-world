@@ -5,7 +5,7 @@ public class Generic {
 
     public static void main(String[] args) {
 
-        welcome("Welcome Player", 456);
+        welcome("Welcome Player: ", 456);
 
         var stringPrinter = new Printer<String>();
         stringPrinter.log("string printer");
